@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jwt from "jsonwebtoken"
 import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
-import type { User } from "./models"
 
 if (!process.env.JWT_SECRET) {
   throw new Error('Missing environment variable: "JWT_SECRET"')
@@ -14,10 +14,12 @@ export function signJWT(payload: any) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 }
 
-export function verifyJWT(token: string): User | null {
+export function verifyJWT(token: string) {
   try {
-    return jwt.verify(token, JWT_SECRET) as User
+    const payload = jwt.verify(token, JWT_SECRET)
+    return payload
   } catch (error) {
+    console.error("JWT verification error:", error)
     return null
   }
 }
@@ -30,7 +32,7 @@ export function setAuthCookie(token: string) {
     path: "/",
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 7, // 1 week
-    sameSite: "strict",
+    sameSite: "lax", // Changed from "strict" to "lax" to allow redirects
   })
 }
 
@@ -53,7 +55,7 @@ export async function getUserFromRequest(req: NextRequest) {
   return payload
 }
 
-export function withAuth(handler: Function) {
+export function withAuth(handler: (req: NextRequest, user: any) => Promise<NextResponse>) {
   return async (req: NextRequest) => {
     const user = await getUserFromRequest(req)
 
@@ -65,7 +67,7 @@ export function withAuth(handler: Function) {
   }
 }
 
-export function withRole(handler: Function, roles: string[]) {
+export function withRole(handler: (req: NextRequest, user: any) => Promise<NextResponse>, roles: string[]) {
   return async (req: NextRequest) => {
     const user = await getUserFromRequest(req)
 
@@ -73,7 +75,7 @@ export function withRole(handler: Function, roles: string[]) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    if (!roles.includes(user.role)) {
+    if (typeof user !== 'string' && 'role' in user && !roles.includes(user.role)) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 })
     }
 

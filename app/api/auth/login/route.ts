@@ -39,14 +39,28 @@ export async function POST(req: NextRequest) {
     // Generate JWT
     const token = signJWT(userForToken)
 
-    // Set cookie
-    setAuthCookie(token)
-
-    return NextResponse.json({
+    // Create a response with the user data
+    const response = NextResponse.json({
       message: "Login successful",
       user: userForToken,
-      token: token, // Include the token in the response
+      token: token,
     })
+
+    // Set the cookie directly on the response
+    response.cookies.set({
+      name: "auth_token",
+      value: token,
+      httpOnly: true,
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      sameSite: "lax", // Changed from "strict" to "lax"
+    })
+
+    // Also use the helper function to set the cookie
+    setAuthCookie(token)
+
+    return response
   } catch (error) {
     console.error("Login error:", error)
     return NextResponse.json({ message: "Internal server error" }, { status: 500 })

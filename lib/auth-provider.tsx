@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     checkAuth()
   }, [])
 
+  // Update the login function in the AuthProvider
   const login = async (email: string, password: string) => {
     setLoading(true)
     try {
@@ -53,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include", // Important: include credentials
       })
 
       if (!response.ok) {
@@ -61,10 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json()
-      setUser(data.user)
+      console.log("Login response:", data)
 
       // Store auth token in localStorage for persistence
       localStorage.setItem("auth_token", data.token || "true")
+
+      // Update user state
+      setUser(data.user)
 
       return data.user
     } catch (error) {
