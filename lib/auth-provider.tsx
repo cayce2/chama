@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in
     const checkAuth = async () => {
       try {
-        const response = await fetch("/api/auth/me")
+        const response = await fetch("/api/auth/members")
         if (response.ok) {
           const userData = await response.json()
           setUser(userData)
@@ -62,7 +62,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json()
       setUser(data.user)
-      router.push("/dashboard")
+
+      // Store auth token in localStorage for persistence
+      localStorage.setItem("auth_token", data.token || "true")
+
+      return data.user
     } catch (error) {
       console.error("Login error:", error)
       throw error

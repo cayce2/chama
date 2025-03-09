@@ -36,7 +36,9 @@ export default function LoginPage() {
 
     try {
       await login(email, password)
+      // Force navigation to dashboard after successful login
       router.push("/dashboard")
+      router.refresh() // Force a refresh to ensure the auth state is updated
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
     } finally {

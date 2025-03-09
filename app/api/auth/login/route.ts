@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       message: "Login successful",
       user: userForToken,
+      token: token, // Include the token in the response
     })
   } catch (error) {
     console.error("Login error:", error)
