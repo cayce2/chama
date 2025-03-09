@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
@@ -81,7 +82,7 @@ export const PUT = withRole(
         return NextResponse.json({ message: "Invalid loan ID" }, { status: 400 })
       }
 
-      const { amount, purpose, interestRate, term, status, startDate, endDate, collateral, guarantors, notes } =
+      const { amount, purpose, interestRate, term, status, collateral, guarantors, notes } =
         await req.json()
 
       const db = await getDb()
@@ -169,7 +170,7 @@ export const PUT = withRole(
         if (status === "completed") {
           // Mark all remaining repayments as completed
           if (existingLoan.repayments && existingLoan.repayments.length > 0) {
-            const updatedRepayments = existingLoan.repayments.map((repayment) => {
+            const updatedRepayments = existingLoan.repayments.map((repayment: any) => {
               if (repayment.status === "pending") {
                 return { ...repayment, status: "completed" }
               }
@@ -192,7 +193,7 @@ export const PUT = withRole(
           : existingLoan.approvedBy
             ? existingLoan.approvedBy.toString()
             : null,
-        guarantors: updateData.guarantors.map((g) => g.toString()),
+        guarantors: updateData.guarantors.map((g: ObjectId) => g.toString()),
       })
     } catch (error) {
       console.error("Error updating loan:", error)
@@ -226,7 +227,7 @@ export const PATCH = withAuth(async (req: NextRequest, { params }: { params: { i
     }
 
     // Find the repayment
-    const repaymentIndex = existingLoan.repayments.findIndex((r) => r._id.toString() === repaymentId)
+    const repaymentIndex = existingLoan.repayments.findIndex((r: any) => r._id.toString() === repaymentId)
     if (repaymentIndex === -1) {
       return NextResponse.json({ message: "Repayment not found" }, { status: 404 })
     }

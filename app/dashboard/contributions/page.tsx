@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -23,8 +24,22 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function ContributionsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [contributions, setContributions] = useState([])
-  const [members, setMembers] = useState([])
+  interface Contribution {
+    id: string;
+    member: string;
+    amount: string;
+    date: string;
+    type: string;
+    status: string;
+  }
+
+  const [contributions, setContributions] = useState<Contribution[]>([])
+  interface Member {
+    id: string;
+    name: string;
+  }
+
+  const [members, setMembers] = useState<Member[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -80,16 +95,16 @@ export default function ContributionsPage() {
     }
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleSelectChange = (field, value) => {
+  const handleSelectChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validation
@@ -142,7 +157,7 @@ export default function ContributionsPage() {
       console.error("Error adding contribution:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to add contribution. Please try again.",
+        description: (error instanceof Error ? error.message : "Failed to add contribution. Please try again."),
         variant: "destructive",
       })
     } finally {

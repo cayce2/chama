@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -23,7 +24,19 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function MembersPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [members, setMembers] = useState([])
+  interface Member {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    joinDate: string;
+    contributions: number;
+    loans: number;
+    status: string;
+  }
+
+  const [members, setMembers] = useState<Member[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [formData, setFormData] = useState({
@@ -62,16 +75,16 @@ export default function MembersPage() {
     }
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleRoleChange = (value) => {
+  const handleRoleChange = (value:string) => {
     setFormData((prev) => ({ ...prev, role: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validation
@@ -139,7 +152,7 @@ export default function MembersPage() {
       console.error("Error adding member:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to add member. Please try again.",
+        description: (error instanceof Error ? error.message : "Failed to add member. Please try again."),
         variant: "destructive",
       })
     } finally {
@@ -153,7 +166,7 @@ export default function MembersPage() {
       member.email.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = (status:string) => {
     switch (status) {
       case "active":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"

@@ -1,8 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getDb } from "@/lib/mongodb"
 import { withAuth } from "@/lib/jwt"
 
-export const GET = withAuth(async (req: NextRequest) => {
+export const GET = withAuth(async () => {
   try {
     const db = await getDb()
 

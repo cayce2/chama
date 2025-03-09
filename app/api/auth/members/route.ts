@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 import { withAuth, withRole } from "@/lib/jwt"
 
 // Get all members
-export const GET = withAuth(async (req: NextRequest) => {
+export const GET = withAuth(async () => {
   try {
     const db = await getDb()
     const members = await db.collection("users").find({}).toArray()
@@ -58,7 +59,7 @@ export const POST = withRole(
         return NextResponse.json({ message: "User already exists with this email" }, { status: 409 })
       }
 
-      // Hash password
+
       const bcrypt = require("bcryptjs")
       const hashedPassword = await bcrypt.hash(password, 10)
 

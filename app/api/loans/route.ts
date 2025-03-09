@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server"
 import { getDb } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
@@ -44,7 +45,7 @@ export const GET = withAuth(async (req: NextRequest) => {
           approverName: approver ? approver.name : null,
           approvalDate: loan.approvalDate,
           collateral: loan.collateral,
-          guarantors: loan.guarantors ? loan.guarantors.map((g) => g.toString()) : [],
+          guarantors: loan.guarantors ? loan.guarantors.map((g: ObjectId) => g.toString()) : [],
           repayments: loan.repayments || [],
           member: user ? user.name : "Unknown Member",
           memberId: loan.userId.toString(),
@@ -61,7 +62,7 @@ export const GET = withAuth(async (req: NextRequest) => {
 })
 
 // Create a new loan application
-export const POST = withAuth(async (req: NextRequest, user: any) => {
+export const POST = withAuth(async (req: NextRequest) => {
   try {
     const { userId, amount, purpose, interestRate, term, collateral, guarantors, notes } = await req.json()
 

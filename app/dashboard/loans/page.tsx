@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -26,13 +27,40 @@ import { useAuth } from "@/lib/auth-provider"
 export default function LoansPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isRepaymentDialogOpen, setIsRepaymentDialogOpen] = useState(false)
-  const [loans, setLoans] = useState([])
-  const [members, setMembers] = useState([])
+  const [loans, setLoans] = useState<Loan[]>([])
+  interface Member {
+    id: string;
+    name: string;
+  }
+
+  const [members, setMembers] = useState<Member[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedLoan, setSelectedLoan] = useState(null)
-  const [selectedRepayment, setSelectedRepayment] = useState(null)
+  interface Loan {
+    id: string;
+    member: string;
+    amount: string;
+    purpose: string;
+    term: string;
+    interestRate: string;
+    collateral?: string;
+    guarantors?: string[];
+    notes?: string;
+    status: string;
+    repayments?: Repayment[];
+    endDate?: string;
+  }
+
+  interface Repayment {
+    _id: string;
+    amount: string;
+    date: string;
+    status: string;
+  }
+
+  const [selectedLoan, setSelectedLoan] = useState<Loan | null>(null)
+  const [selectedRepayment, setSelectedRepayment] = useState<Repayment | null>(null)
   const [formData, setFormData] = useState({
     userId: "",
     amount: "",
@@ -94,25 +122,25 @@ export default function LoansPage() {
     }
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleRepaymentInputChange = (e) => {
-    const { id, value } = e.target
-    setRepaymentData((prev) => ({ ...prev, [id]: value }))
-  }
+  const handleRepaymentInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { id, value } = e.target
+      setRepaymentData((prev) => ({ ...prev, [id]: value }))
+    }
 
-  const handleSelectChange = (field, value) => {
+  const handleSelectChange = (field: string, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleRepaymentSelectChange = (field, value) => {
+  const handleRepaymentSelectChange = (field:string, value:string) => {
     setRepaymentData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validation
@@ -167,7 +195,7 @@ export default function LoansPage() {
       console.error("Error submitting loan application:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to submit loan application. Please try again.",
+        description: (error instanceof Error ? error.message : "Failed to submit loan application. Please try again."),
         variant: "destructive",
       })
     } finally {
@@ -175,7 +203,7 @@ export default function LoansPage() {
     }
   }
 
-  const handleLoanAction = async (loanId, action) => {
+  const handleLoanAction = async (loanId:string, action:string) => {
     try {
       setIsLoading(true)
 
@@ -203,7 +231,7 @@ export default function LoansPage() {
       console.error(`Error ${action} loan:`, error)
       toast({
         title: "Error",
-        description: error.message || `Failed to ${action} loan. Please try again.`,
+        description: (error instanceof Error ? error.message : `Failed to ${action} loan. Please try again.`),
         variant: "destructive",
       })
     } finally {
@@ -211,7 +239,7 @@ export default function LoansPage() {
     }
   }
 
-  const handleRepaymentSubmit = async (e) => {
+  const handleRepaymentSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     if (!selectedLoan || !selectedRepayment) {
@@ -266,7 +294,7 @@ export default function LoansPage() {
       console.error("Error recording repayment:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to record repayment. Please try again.",
+        description: (error instanceof Error ? error.message : "Failed to record repayment. Please try again."),
         variant: "destructive",
       })
     } finally {
@@ -274,7 +302,7 @@ export default function LoansPage() {
     }
   }
 
-  const openRepaymentDialog = (loan, repayment) => {
+  const openRepaymentDialog = (loan: Loan, repayment: Repayment) => {
     setSelectedLoan(loan)
     setSelectedRepayment(repayment)
     setRepaymentData({
@@ -287,12 +315,12 @@ export default function LoansPage() {
   }
 
   const filteredLoans = loans.filter(
-    (loan) =>
+    (loan: Loan) =>
       loan.member.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loan.purpose.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "active":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
@@ -353,7 +381,7 @@ export default function LoansPage() {
                     type="number"
                     placeholder="0.00"
                     value={formData.amount}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleRepaymentInputChange(e)}
                     required
                   />
                 </div>
@@ -405,7 +433,7 @@ export default function LoansPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="guarantors">Guarantors (Optional)</Label>
                   <Select
-                    value={formData.guarantors}
+                    value={formData.guarantors[0] || ""}
                     onValueChange={(value) => handleSelectChange("guarantors", [value])}
                   >
                     <SelectTrigger id="guarantors">
@@ -468,7 +496,7 @@ export default function LoansPage() {
                     <strong>Member:</strong> {selectedLoan?.member}
                   </p>
                   <p>
-                    <strong>Amount Due:</strong> ${selectedRepayment?.amount?.toFixed(2)}
+                    <strong>Amount Due:</strong> ${Number(selectedRepayment?.amount).toFixed(2)}
                   </p>
                   <p>
                     <strong>Due Date:</strong>{" "}
@@ -666,7 +694,7 @@ export default function LoansPage() {
                             <TableCell>
                               ${totalRepaid.toLocaleString()}
                               <span className="text-muted-foreground text-xs ml-1">
-                                ({Math.round((totalRepaid / loan.amount) * 100)}%)
+                                ({Math.round((totalRepaid / Number(loan.amount)) * 100)}%)
                               </span>
                             </TableCell>
                             <TableCell>

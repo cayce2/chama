@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -24,7 +25,20 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function InvestmentsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [investments, setInvestments] = useState([])
+  interface Investment {
+    id: string;
+    name: string;
+    amount: string;
+    startDate: string;
+    endDate?: string;
+    expectedReturn: string;
+    actualReturn?: string;
+    category: string;
+    risk: string;
+    status: string;
+  }
+
+  const [investments, setInvestments] = useState<Investment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -68,16 +82,16 @@ export default function InvestmentsPage() {
     }
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target
     setFormData((prev) => ({ ...prev, [id]: value }))
   }
 
-  const handleSelectChange = (field, value) => {
+  const handleSelectChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e :React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validation
@@ -139,7 +153,7 @@ export default function InvestmentsPage() {
       console.error("Error adding investment:", error)
       toast({
         title: "Error",
-        description: error.message || "Failed to add investment. Please try again.",
+        description: (error instanceof Error ? error.message : "Failed to add investment. Please try again."),
         variant: "destructive",
       })
     } finally {
@@ -153,7 +167,7 @@ export default function InvestmentsPage() {
       investment.category.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const getStatusBadgeClass = (status) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case "active":
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
@@ -168,7 +182,7 @@ export default function InvestmentsPage() {
     }
   }
 
-  const getRiskBadgeClass = (risk) => {
+  const getRiskBadgeClass = (risk: string) => {
     switch (risk) {
       case "low":
         return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100"
@@ -205,7 +219,7 @@ export default function InvestmentsPage() {
                     id="name"
                     placeholder="Enter investment name"
                     value={formData.name}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>)}
                     required
                   />
                 </div>
@@ -215,7 +229,7 @@ export default function InvestmentsPage() {
                     id="description"
                     placeholder="Describe the investment opportunity"
                     value={formData.description}
-                    onChange={handleInputChange}
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleInputChange(e)}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
